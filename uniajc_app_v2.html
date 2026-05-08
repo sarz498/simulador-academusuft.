@@ -1,0 +1,726 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #1a4fa0; --blue-light: #2563c7; --blue-dark: #0d3278;
+  --blue-soft: #e8f0fb; --white: #ffffff; --gray: #f4f6fb;
+  --border: #c5d4ef; --text: #1a2540; --text-muted: #5a6a8a;
+  --success: #1a7a4a; --success-bg: #e6f4ed;
+  --danger: #c0392b; --danger-bg: #fdecea;
+  --warning: #9a6800; --warning-bg: #fff8e6;
+  --radius: 10px;
+}
+body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--gray); color: var(--text); }
+.app { max-width: 420px; margin: 0 auto; min-height: 100vh; background: var(--white); display: flex; flex-direction: column; }
+.screen { display: none; flex: 1; flex-direction: column; }
+.screen.active { display: flex; }
+
+.topbar-brand { background: var(--blue); display: flex; align-items: center; gap: 12px; padding: 14px 16px 12px; }
+.topbar-logo { width: 38px; height: 38px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: var(--blue); flex-shrink: 0; }
+.topbar-title { font-size: 12px; font-weight: 700; color: white; line-height: 1.3; }
+.topbar-sub { font-size: 10px; color: rgba(255,255,255,0.75); }
+.back-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; line-height: 1; margin-right: 4px; }
+
+.login-hero { background: var(--blue); padding: 28px 24px 44px; text-align: center; }
+.login-logo-big { width: 68px; height: 68px; background: white; border-radius: 14px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 32px; color: var(--blue); }
+.login-title { color: white; font-size: 16px; font-weight: 700; }
+.login-sub { color: rgba(255,255,255,0.75); font-size: 11px; margin-top: 3px; }
+.login-card { background: white; border-radius: 18px 18px 0 0; margin-top: -16px; padding: 26px 22px 20px; flex: 1; }
+.login-card h2 { font-size: 15px; font-weight: 700; color: var(--blue); margin-bottom: 3px; }
+.login-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+.field { margin-bottom: 13px; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--blue-dark); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+.field input, .field select, .field textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 11px; font-size: 13px; color: var(--text); background: var(--white); outline: none; transition: border 0.2s; font-family: inherit; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--blue); }
+.field textarea { resize: none; height: 70px; }
+.btn-primary { width: 100%; background: var(--blue); color: white; border: none; border-radius: 8px; padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.btn-primary:hover { background: var(--blue-light); }
+.btn-secondary { background: var(--blue-soft); color: var(--blue); border: none; border-radius: 8px; padding: 9px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.btn-danger { background: var(--danger-bg); color: var(--danger); border: none; border-radius: 8px; padding: 9px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.btn-success { background: var(--success-bg); color: var(--success); border: none; border-radius: 8px; padding: 9px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.error-msg { background: var(--danger-bg); color: var(--danger); border-radius: 8px; padding: 8px 11px; font-size: 12px; margin-top: 10px; display: none; }
+.error-msg.show { display: block; }
+.success-toast { background: var(--success-bg); color: var(--success); border-radius: 8px; padding: 8px 11px; font-size: 12px; margin-bottom: 10px; display: none; font-weight: 600; }
+.success-toast.show { display: block; }
+.login-notice { background: var(--blue-soft); border-radius: 8px; padding: 9px 11px; font-size: 11px; color: var(--blue-dark); margin-top: 14px; line-height: 1.5; }
+
+.dash-header { background: var(--blue); padding: 14px 16px 16px; }
+.dash-user { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 46px; height: 46px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+.dash-name { color: white; font-weight: 700; font-size: 14px; }
+.dash-prog { color: rgba(255,255,255,0.8); font-size: 11px; }
+.dash-sit { background: rgba(255,255,255,0.18); border-radius: 20px; padding: 2px 9px; font-size: 10px; color: white; margin-top: 3px; display: inline-block; }
+
+.section-title { font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; padding: 13px 16px 5px; }
+.menu-list { padding: 0 12px 8px; }
+.menu-item { display: flex; align-items: center; gap: 11px; padding: 10px 11px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 5px; cursor: pointer; transition: all 0.15s; }
+.menu-item:hover { background: var(--blue-soft); border-color: var(--blue); }
+.menu-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--blue-soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.menu-icon svg { width: 16px; height: 16px; }
+.menu-label { font-size: 13px; font-weight: 600; }
+.menu-desc { font-size: 11px; color: var(--text-muted); }
+.menu-arrow { margin-left: auto; color: var(--border); font-size: 16px; }
+
+.profile-hdr { background: var(--blue); padding: 16px; }
+.profile-hdr-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.profile-av-big { width: 64px; height: 64px; border-radius: 50%; background: white; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: var(--blue); border: 2px solid rgba(255,255,255,0.35); }
+.profile-name { color: white; font-size: 15px; font-weight: 700; text-align: center; }
+.profile-prog-txt { color: rgba(255,255,255,0.78); font-size: 11px; text-align: center; }
+
+.profile-body { padding: 14px; }
+.info-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 11px; overflow: hidden; }
+.info-card-title { background: var(--blue); color: white; font-size: 11px; font-weight: 700; padding: 7px 13px; display: flex; justify-content: space-between; align-items: center; }
+.edit-icon-btn { background: rgba(255,255,255,0.18); border: none; color: white; border-radius: 5px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-weight: 600; }
+.info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 13px; border-bottom: 1px solid var(--border); }
+.info-row:last-child { border-bottom: none; }
+.info-label { font-size: 11px; color: var(--text-muted); }
+.info-value { font-size: 12px; font-weight: 600; color: var(--text); text-align: right; max-width: 58%; }
+
+.badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-danger { background: var(--danger-bg); color: var(--danger); }
+
+.stat-row { display: flex; gap: 7px; margin-bottom: 12px; }
+.stat-box { flex: 1; background: var(--blue-soft); border-radius: 8px; padding: 9px; text-align: center; }
+.stat-num { font-size: 20px; font-weight: 700; color: var(--blue); }
+.stat-lbl { font-size: 9px; color: var(--text-muted); margin-top: 1px; text-transform: uppercase; }
+
+.admin-body { padding: 13px; }
+.add-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--blue); color: white; border: none; border-radius: var(--radius); padding: 12px; width: 100%; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 12px; }
+.student-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; padding: 10px 12px; cursor: pointer; display: flex; align-items: center; gap: 11px; transition: all 0.15s; }
+.student-card:hover { border-color: var(--blue); background: var(--blue-soft); }
+.student-av { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-soft); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--blue); flex-shrink: 0; }
+.student-name { font-size: 13px; font-weight: 700; }
+.student-info { font-size: 11px; color: var(--text-muted); }
+
+.modal-overlay { display: none; position: absolute; inset: 0; background: rgba(10,30,80,0.42); z-index: 100; align-items: flex-end; justify-content: center; min-height: 600px; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 18px 18px 0 0; width: 100%; max-height: 88vh; overflow-y: auto; }
+.modal-header { background: var(--blue); color: white; padding: 13px 15px; border-radius: 16px 16px 0 0; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.modal-title { font-size: 13px; font-weight: 700; }
+.modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; line-height: 1; }
+.modal-body { padding: 15px; }
+.modal-footer { padding: 10px 15px; display: flex; gap: 7px; border-top: 1px solid var(--border); position: sticky; bottom: 0; background: white; }
+.modal-footer button { flex: 1; }
+
+.tabs { display: flex; border-bottom: 1.5px solid var(--border); margin-bottom: 12px; }
+.tab { flex: 1; text-align: center; padding: 8px 0; font-size: 11px; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1.5px; text-transform: uppercase; letter-spacing: 0.3px; }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.nota-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.nota-row:last-child { border-bottom: none; }
+.nota-subject { font-size: 12px; font-weight: 600; }
+.nota-credits { font-size: 10px; color: var(--text-muted); }
+.nota-val { font-size: 14px; font-weight: 700; color: var(--blue); }
+.nota-val.fail { color: var(--danger); }
+.semaforo-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #22c55e; } .dot-yellow { background: #f59e0b; } .dot-red { background: #ef4444; }
+
+.hor-grid { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.hor-header { display: grid; grid-template-columns: 52px repeat(5, 1fr); background: var(--blue); color: white; }
+.hor-cell { padding: 5px 2px; font-size: 9px; font-weight: 700; text-align: center; border-right: 1px solid rgba(255,255,255,0.2); }
+.hor-row { display: grid; grid-template-columns: 52px repeat(5, 1fr); border-top: 1px solid var(--border); }
+.hor-row:nth-child(even) { background: var(--gray); }
+.hor-cell-b { padding: 4px 2px; font-size: 9px; text-align: center; border-right: 1px solid var(--border); color: var(--text-muted); }
+.hor-clase { background: var(--blue-soft); color: var(--blue); border-radius: 3px; padding: 2px 1px; font-size: 8px; font-weight: 700; line-height: 1.3; }
+
+.edit-form-section { margin-bottom: 14px; }
+.edit-section-label { font-size: 10px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1.5px solid var(--blue-soft); }
+</style>
+
+<div class="app" style="position:relative;">
+
+<div class="screen active" id="screen-login">
+  <div class="login-hero">
+    <div class="login-logo-big">U</div>
+    <div class="login-title">Institución Universitaria<br>Antonio José Camacho</div>
+    <div class="login-sub">Portal Académico Estudiantil</div>
+  </div>
+  <div class="login-card">
+    <h2>Ingreso al Sistema</h2>
+    <p>Ingresa tus credenciales del Campus TI</p>
+    <div class="field"><label>Usuario</label><input type="text" id="login-user" placeholder="Número de documento o admin"/></div>
+    <div class="field"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••"/></div>
+    <div class="error-msg" id="login-error">Usuario o contraseña incorrectos.</div>
+    <button class="btn-primary" onclick="doLogin()" style="margin-top:6px;">Ingresar</button>
+    <div class="login-notice"><b>Estudiantes nuevos:</b> tu contraseña inicial es el mismo número de documento.<br><b>Admin:</b> usuario <i>admin</i> / contraseña <i>admin123</i></div>
+  </div>
+</div>
+
+<div class="screen" id="screen-dashboard">
+  <div class="dash-header">
+    <div class="dash-user">
+      <div class="avatar" id="dash-avatar">JS</div>
+      <div>
+        <div class="dash-name" id="dash-name">Juan Estudiante</div>
+        <div class="dash-prog" id="dash-prog">Ingeniería de Sistemas</div>
+        <div class="dash-sit" id="dash-sit">Activo</div>
+      </div>
+    </div>
+  </div>
+  <div style="overflow-y:auto;flex:1;">
+    <div class="section-title">Hoja de Vida</div>
+    <div class="menu-list">
+      <div class="menu-item" onclick="showProfile()">
+        <div class="menu-icon"><svg fill="none" viewBox="0 0 24 24" stroke="#1a4fa0" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <div><div class="menu-label">Datos Personales</div><div class="menu-desc">Ver y editar perfil</div></div>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="openModal('modal-familia')">
+        <div class="menu-icon"><svg fill="none" viewBox="0 0 24 24" stroke="#1a4fa0" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><div class="menu-label">Grupo Familiar</div><div class="menu-desc">Información familiar</div></div>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="openModal('modal-sanciones')">
+        <div class="menu-icon"><svg fill="none" viewBox="0 0 24 24" stroke="#1a4fa0" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div><div class="menu-label">Consultar Sanciones</div><div class="menu-desc">Sanciones académicas</div></div>
+        <span class="menu-arrow">›</span>
+      </div>
+    </div>
+    <div class="section-title">Académico</div>
+    <div class="menu-list">
+      <div class="menu-item" onclick="openModal('modal-matricula')">
+        <div class="menu-icon"><svg fill="none" viewBox="0 0 24 24" stroke="#1a4fa0" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div><div class="menu-label">Matrícula</div><div class="menu-desc">Estado y materias</div></div>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="openModal('modal-horario')">
+        <div class="menu-icon"><svg fill="none" viewBox="0 0 24 24" stroke="#1a4fa0" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>
+        <div><div class="menu-label">Horario</div><div class="menu-desc">Clases y salones</div></div>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="openModal('modal-notas')">
+        <div class="menu-icon"><svg fill="none" viewBox="0 0 24 24" stroke="#1a4fa0" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+        <div><div class="menu-label">Calificaciones</div><div class="menu-desc">Notas y semáforo</div></div>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="openModal('modal-pensum')">
+        <div class="menu-icon"><svg fill="none" viewBox="0 0 24 24" stroke="#1a4fa0" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <div><div class="menu-label">Consultar Pensum</div><div class="menu-desc">Plan de estudios</div></div>
+        <span class="menu-arrow">›</span>
+      </div>
+    </div>
+    <div class="section-title">Administración</div>
+    <div class="menu-list">
+      <div class="menu-item" onclick="goAdmin()">
+        <div class="menu-icon" style="background:#fdecea"><svg fill="none" viewBox="0 0 24 24" stroke="#c0392b" stroke-width="2"><path d="M12 4.354a4 4 0 1 1 0 5.292"/><path d="M15 21H3v-1a6 6 0 0 1 12 0v1z"/><path d="M21 21v-1a6 6 0 0 0-4.392-5.785"/></svg></div>
+        <div><div class="menu-label">Gestión de Estudiantes</div><div class="menu-desc">Agregar, editar, eliminar</div></div>
+        <span class="menu-arrow" style="color:#c0392b">›</span>
+      </div>
+      <div class="menu-item" onclick="doLogout()">
+        <div class="menu-icon" style="background:#fdecea"><svg fill="none" viewBox="0 0 24 24" stroke="#c0392b" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+        <div><div class="menu-label" style="color:#c0392b">Cerrar Sesión</div><div class="menu-desc">Salir del sistema</div></div>
+        <span class="menu-arrow" style="color:#c0392b">›</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-profile">
+  <div class="profile-hdr">
+    <div class="profile-hdr-top">
+      <button class="back-btn" onclick="showScreen('screen-dashboard')">‹</button>
+      <span style="color:white;font-weight:700;font-size:13px;">Perfil del Estudiante</span>
+      <button onclick="openEditProfile()" style="margin-left:auto;background:rgba(255,255,255,0.18);border:none;color:white;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✏ Editar</button>
+    </div>
+    <div style="text-align:center;">
+      <div class="profile-av-big" id="profile-avatar">JS</div>
+      <div class="profile-name" id="profile-name">Juan Estudiante</div>
+      <div class="profile-prog-txt" id="profile-prog">Ingeniería de Sistemas</div>
+    </div>
+  </div>
+  <div class="profile-body" style="overflow-y:auto;flex:1;">
+    <div class="success-toast" id="profile-toast">Datos actualizados correctamente.</div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-num" id="stat-ps">3.8</div><div class="stat-lbl">Prom. Sem</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-pg">3.6</div><div class="stat-lbl">Prom. Gral</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-cr">52</div><div class="stat-lbl">Créditos</div></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Datos Personales <button class="edit-icon-btn" onclick="openEditProfile()">✏ Editar</button></div>
+      <div class="info-row"><span class="info-label">Tipo Doc.</span><span class="info-value" id="p-tipo">CC</span></div>
+      <div class="info-row"><span class="info-label">Número</span><span class="info-value" id="p-doc">—</span></div>
+      <div class="info-row"><span class="info-label">Nombres</span><span class="info-value" id="p-nombre">—</span></div>
+      <div class="info-row"><span class="info-label">Apellidos</span><span class="info-value" id="p-apellido">—</span></div>
+      <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="p-email">—</span></div>
+      <div class="info-row"><span class="info-label">Teléfono</span><span class="info-value" id="p-tel">—</span></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Información Académica <button class="edit-icon-btn" onclick="openEditAcad()">✏ Editar</button></div>
+      <div class="info-row"><span class="info-label">Programa</span><span class="info-value" id="p-prog">—</span></div>
+      <div class="info-row"><span class="info-label">Semestre</span><span class="info-value" id="p-sem">—</span></div>
+      <div class="info-row"><span class="info-label">Jornada</span><span class="info-value" id="p-jornada">—</span></div>
+      <div class="info-row"><span class="info-label">Metodología</span><span class="info-value" id="p-met">—</span></div>
+      <div class="info-row"><span class="info-label">Situación</span><span class="info-value" id="p-sit">—</span></div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Promedios <button class="edit-icon-btn" onclick="openEditPromedios()">✏ Editar</button></div>
+      <div class="info-row"><span class="info-label">Prom. Semestral</span><span class="info-value" id="p-ps">—</span></div>
+      <div class="info-row"><span class="info-label">Prom. General</span><span class="info-value" id="p-pg">—</span></div>
+      <div class="info-row"><span class="info-label">Créditos Cursados</span><span class="info-value" id="p-cred">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-admin">
+  <div class="dash-header">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="back-btn" onclick="showScreen('screen-dashboard')">‹</button>
+      <span style="color:white;font-weight:700;font-size:13px;">Gestión de Estudiantes</span>
+    </div>
+  </div>
+  <div class="admin-body" style="overflow-y:auto;flex:1;">
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-num" id="admin-count">2</div><div class="stat-lbl">Estudiantes</div></div>
+      <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">Programas</div></div>
+    </div>
+    <div class="success-toast" id="admin-toast">Estudiante guardado correctamente.</div>
+    <button class="add-btn" onclick="openAddStudent()">+ Agregar Estudiante</button>
+    <div id="student-list"></div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR DATOS PERSONALES -->
+<div class="modal-overlay" id="modal-edit-personal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Editar Datos Personales</span><button class="modal-close" onclick="closeModal('modal-edit-personal')">×</button></div>
+    <div class="modal-body">
+      <div class="edit-section-label">Identificación</div>
+      <div class="field"><label>Tipo de Documento</label><select id="ep-tipo"><option>CC</option><option>TI</option><option>CE</option><option>Pasaporte</option></select></div>
+      <div class="field"><label>Número de Documento</label><input type="text" id="ep-doc"/></div>
+      <div class="edit-section-label" style="margin-top:4px;">Nombres y Contacto</div>
+      <div class="field"><label>Nombres</label><input type="text" id="ep-nombre"/></div>
+      <div class="field"><label>Apellidos</label><input type="text" id="ep-apellido"/></div>
+      <div class="field"><label>Email</label><input type="email" id="ep-email"/></div>
+      <div class="field"><label>Teléfono</label><input type="text" id="ep-tel"/></div>
+      <div class="error-msg" id="ep-error">Completa todos los campos.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-edit-personal')">Cancelar</button>
+      <button class="btn-primary" style="width:auto;" onclick="savePersonal()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR INFO ACADÉMICA -->
+<div class="modal-overlay" id="modal-edit-acad">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Editar Info Académica</span><button class="modal-close" onclick="closeModal('modal-edit-acad')">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Programa Académico</label>
+        <select id="ea-prog">
+          <option>Ingeniería de Sistemas</option><option>Ingeniería Industrial</option>
+          <option>Administración de Empresas</option><option>Contaduría Pública</option>
+          <option>Tecnología en Sistemas</option>
+        </select>
+      </div>
+      <div class="field"><label>Semestre</label>
+        <select id="ea-sem"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select>
+      </div>
+      <div class="field"><label>Jornada</label>
+        <select id="ea-jornada"><option>Nocturna</option><option>Diurna</option><option>Fin de Semana</option></select>
+      </div>
+      <div class="field"><label>Metodología</label>
+        <select id="ea-met"><option>Presencial</option><option>Distancia</option><option>Virtual</option></select>
+      </div>
+      <div class="field"><label>Situación Académica</label>
+        <select id="ea-sit"><option>Activo</option><option>Inactivo</option><option>Retirado</option><option>Graduado</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-edit-acad')">Cancelar</button>
+      <button class="btn-primary" style="width:auto;" onclick="saveAcad()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR PROMEDIOS -->
+<div class="modal-overlay" id="modal-edit-promedios">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Editar Promedios</span><button class="modal-close" onclick="closeModal('modal-edit-promedios')">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Promedio Semestral</label><input type="number" id="epr-sem" min="0" max="5" step="0.1" placeholder="0.0"/></div>
+      <div class="field"><label>Promedio General</label><input type="number" id="epr-gen" min="0" max="5" step="0.1" placeholder="0.0"/></div>
+      <div class="field"><label>Créditos Cursados</label><input type="number" id="epr-cred" min="0" placeholder="0"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-edit-promedios')">Cancelar</button>
+      <button class="btn-primary" style="width:auto;" onclick="savePromedios()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR / EDITAR ESTUDIANTE (admin) -->
+<div class="modal-overlay" id="modal-student-form">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title" id="sf-title">Agregar Estudiante</span><button class="modal-close" onclick="closeModal('modal-student-form')">×</button></div>
+    <div class="modal-body">
+      <div class="edit-section-label">Identificación</div>
+      <div class="field"><label>Tipo Doc.</label><select id="sf-tipo"><option>CC</option><option>TI</option><option>CE</option><option>Pasaporte</option></select></div>
+      <div class="field"><label>Número de Documento</label><input type="text" id="sf-doc" placeholder="1234567890"/></div>
+      <div class="edit-section-label" style="margin-top:4px;">Datos Personales</div>
+      <div class="field"><label>Nombres</label><input type="text" id="sf-nombre" placeholder="Ej: Juan"/></div>
+      <div class="field"><label>Apellidos</label><input type="text" id="sf-apellido" placeholder="Ej: García López"/></div>
+      <div class="field"><label>Email</label><input type="email" id="sf-email" placeholder="correo@uniajc.edu.co"/></div>
+      <div class="field"><label>Teléfono</label><input type="text" id="sf-tel" placeholder="300 000 0000"/></div>
+      <div class="edit-section-label" style="margin-top:4px;">Información Académica</div>
+      <div class="field"><label>Programa</label>
+        <select id="sf-prog">
+          <option>Ingeniería de Sistemas</option><option>Ingeniería Industrial</option>
+          <option>Administración de Empresas</option><option>Contaduría Pública</option>
+          <option>Tecnología en Sistemas</option>
+        </select>
+      </div>
+      <div class="field"><label>Semestre</label>
+        <select id="sf-sem"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select>
+      </div>
+      <div class="field"><label>Jornada</label><select id="sf-jornada"><option>Nocturna</option><option>Diurna</option><option>Fin de Semana</option></select></div>
+      <div class="field"><label>Metodología</label><select id="sf-met"><option>Presencial</option><option>Distancia</option><option>Virtual</option></select></div>
+      <div class="field"><label>Situación</label><select id="sf-sit"><option>Activo</option><option>Inactivo</option><option>Retirado</option><option>Graduado</option></select></div>
+      <div class="edit-section-label" style="margin-top:4px;">Promedios</div>
+      <div class="field"><label>Promedio Semestral</label><input type="number" id="sf-ps" placeholder="0.0" min="0" max="5" step="0.1"/></div>
+      <div class="field"><label>Promedio General</label><input type="number" id="sf-pg" placeholder="0.0" min="0" max="5" step="0.1"/></div>
+      <div class="field"><label>Créditos</label><input type="number" id="sf-cred" placeholder="0" min="0"/></div>
+      <div class="error-msg" id="sf-error">Completa los campos obligatorios.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-student-form')">Cancelar</button>
+      <button class="btn-primary" style="width:auto;" id="sf-save-btn" onclick="saveStudentForm()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETALLE ESTUDIANTE (admin) -->
+<div class="modal-overlay" id="modal-student-detail">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Detalle Estudiante</span><button class="modal-close" onclick="closeModal('modal-student-detail')">×</button></div>
+    <div class="modal-body" id="student-detail-body"></div>
+    <div class="modal-footer" style="flex-wrap:wrap;gap:6px;">
+      <button class="btn-danger" onclick="deleteStudent()">Eliminar</button>
+      <button class="btn-secondary" onclick="editSelectedStudent()">✏ Editar</button>
+      <button class="btn-primary" style="width:auto;flex:1;" onclick="loginAsStudent()">Ingresar como este</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALES INFORMATIVOS -->
+<div class="modal-overlay" id="modal-notas">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Calificaciones</span><button class="modal-close" onclick="closeModal('modal-notas')">×</button></div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('notas','actuales',this)">Actuales</div>
+        <div class="tab" onclick="switchTab('notas','registro',this)">Registro</div>
+        <div class="tab" onclick="switchTab('notas','semaforo',this)">Semáforo</div>
+      </div>
+      <div class="tab-content active" id="notas-actuales">
+        <div class="nota-row"><div><div class="nota-subject">Cálculo Diferencial</div><div class="nota-credits">3 créditos</div></div><div class="nota-val">4.2</div></div>
+        <div class="nota-row"><div><div class="nota-subject">Programación I</div><div class="nota-credits">4 créditos</div></div><div class="nota-val">3.8</div></div>
+        <div class="nota-row"><div><div class="nota-subject">Álgebra Lineal</div><div class="nota-credits">3 créditos</div></div><div class="nota-val fail">2.9</div></div>
+        <div class="nota-row"><div><div class="nota-subject">Inglés II</div><div class="nota-credits">2 créditos</div></div><div class="nota-val">4.0</div></div>
+        <div style="margin-top:12px;background:var(--blue-soft);border-radius:8px;padding:9px;display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--blue-dark);font-weight:700;">Promedio Semestral</span><span style="font-size:15px;font-weight:700;color:var(--blue);">3.8</span></div>
+      </div>
+      <div class="tab-content" id="notas-registro">
+        <div class="nota-row"><div><div class="nota-subject">Semestre 1 — 2023</div></div><div class="nota-val">3.5</div></div>
+        <div class="nota-row"><div><div class="nota-subject">Semestre 2 — 2023</div></div><div class="nota-val">3.7</div></div>
+        <div class="nota-row"><div><div class="nota-subject">Semestre 1 — 2024</div></div><div class="nota-val">3.6</div></div>
+        <div class="nota-row"><div><div class="nota-subject">Semestre 2 — 2024</div></div><div class="nota-val">3.9</div></div>
+      </div>
+      <div class="tab-content" id="notas-semaforo">
+        <div class="semaforo-item"><div class="dot dot-green"></div><div><div style="font-size:12px;font-weight:600;">Programación I</div><div style="font-size:10px;color:var(--text-muted);">Sin riesgo — 3.8</div></div></div>
+        <div class="semaforo-item"><div class="dot dot-green"></div><div><div style="font-size:12px;font-weight:600;">Cálculo Diferencial</div><div style="font-size:10px;color:var(--text-muted);">Sin riesgo — 4.2</div></div></div>
+        <div class="semaforo-item"><div class="dot dot-red"></div><div><div style="font-size:12px;font-weight:600;">Álgebra Lineal</div><div style="font-size:10px;color:var(--text-muted);">En riesgo — 2.9</div></div></div>
+        <div class="semaforo-item"><div class="dot dot-green"></div><div><div style="font-size:12px;font-weight:600;">Inglés II</div><div style="font-size:10px;color:var(--text-muted);">Sin riesgo — 4.0</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-horario">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Horario de Clases</span><button class="modal-close" onclick="closeModal('modal-horario')">×</button></div>
+    <div class="modal-body">
+      <div class="hor-grid">
+        <div class="hor-header"><div class="hor-cell">Hora</div><div class="hor-cell">Lun</div><div class="hor-cell">Mar</div><div class="hor-cell">Mié</div><div class="hor-cell">Jue</div><div class="hor-cell">Vie</div></div>
+        <div class="hor-row"><div class="hor-cell-b">18:00</div><div class="hor-cell-b"><div class="hor-clase">Cálculo<br>302</div></div><div class="hor-cell-b"></div><div class="hor-cell-b"><div class="hor-clase">Inglés<br>105</div></div><div class="hor-cell-b"></div><div class="hor-cell-b"></div></div>
+        <div class="hor-row"><div class="hor-cell-b">19:00</div><div class="hor-cell-b"><div class="hor-clase">Cálculo<br>302</div></div><div class="hor-cell-b"><div class="hor-clase">Prog I<br>Lab A</div></div><div class="hor-cell-b"><div class="hor-clase">Inglés<br>105</div></div><div class="hor-cell-b"><div class="hor-clase">Álgebra<br>201</div></div><div class="hor-cell-b"></div></div>
+        <div class="hor-row"><div class="hor-cell-b">20:00</div><div class="hor-cell-b"></div><div class="hor-cell-b"><div class="hor-clase">Prog I<br>Lab A</div></div><div class="hor-cell-b"></div><div class="hor-cell-b"><div class="hor-clase">Álgebra<br>201</div></div><div class="hor-cell-b"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-familia">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Grupo Familiar</span><button class="modal-close" onclick="closeModal('modal-familia')">×</button></div>
+    <div class="modal-body">
+      <div class="info-card">
+        <div class="info-card-title">Acudiente / Responsable</div>
+        <div class="info-row"><span class="info-label">Nombre</span><span class="info-value">María González</span></div>
+        <div class="info-row"><span class="info-label">Parentesco</span><span class="info-value">Madre</span></div>
+        <div class="info-row"><span class="info-label">Teléfono</span><span class="info-value">310 000 0001</span></div>
+        <div class="info-row"><span class="info-label">Ciudad</span><span class="info-value">Cali, Valle</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-sanciones">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Consultar Sanciones</span><button class="modal-close" onclick="closeModal('modal-sanciones')">×</button></div>
+    <div class="modal-body" style="text-align:center;padding:28px 0;">
+      <div style="font-size:36px;margin-bottom:10px;">✅</div>
+      <div style="font-size:14px;font-weight:700;color:var(--success);">Sin sanciones registradas</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:5px;">No tienes sanciones académicas activas</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-matricula">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Consultar Matrícula</span><button class="modal-close" onclick="closeModal('modal-matricula')">×</button></div>
+    <div class="modal-body">
+      <div class="info-card">
+        <div class="info-card-title">Matrícula Semestre 2025-2</div>
+        <div class="info-row"><span class="info-label">Estado</span><span class="info-value"><span class="badge badge-success">Matriculado</span></span></div>
+        <div class="info-row"><span class="info-label">Créditos</span><span class="info-value">12 créditos</span></div>
+        <div class="info-row"><span class="info-label">Materias</span><span class="info-value">4 asignaturas</span></div>
+        <div class="info-row"><span class="info-label">Valor</span><span class="info-value">$2.450.000</span></div>
+        <div class="info-row"><span class="info-label">Pago</span><span class="info-value"><span class="badge badge-success">Pagado</span></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-pensum">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Pensum Académico</span><button class="modal-close" onclick="closeModal('modal-pensum')">×</button></div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Ingeniería de Sistemas — 160 créditos</div>
+      <div class="nota-row"><div><div class="nota-subject">Cálculo Diferencial</div><div class="nota-credits">Sem. 1 · 3 créditos</div></div><span class="badge badge-success">Aprobado</span></div>
+      <div class="nota-row"><div><div class="nota-subject">Programación I</div><div class="nota-credits">Sem. 1 · 4 créditos</div></div><span class="badge badge-success">Aprobado</span></div>
+      <div class="nota-row"><div><div class="nota-subject">Álgebra Lineal</div><div class="nota-credits">Sem. 2 · 3 créditos</div></div><span class="badge badge-warning">En curso</span></div>
+      <div class="nota-row"><div><div class="nota-subject">Bases de Datos</div><div class="nota-credits">Sem. 3 · 4 créditos</div></div><span style="font-size:11px;color:var(--text-muted)">Pendiente</span></div>
+      <div class="nota-row"><div><div class="nota-subject">Redes de Computadores</div><div class="nota-credits">Sem. 4 · 3 créditos</div></div><span style="font-size:11px;color:var(--text-muted)">Pendiente</span></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+let students = [
+  { tipo:'CC',doc:'10000001',nombre:'Juan',apellido:'Pérez',email:'jperez@uniajc.edu.co',tel:'3111111111',prog:'Ingeniería de Sistemas',sem:'5',jornada:'Nocturna',met:'Presencial',sit:'Activo',promSem:'3.8',promGen:'3.6',cred:'52' },
+  { tipo:'CC',doc:'10000002',nombre:'Laura',apellido:'Martínez',email:'lmartinez@uniajc.edu.co',tel:'3222222222',prog:'Administración de Empresas',sem:'3',jornada:'Diurna',met:'Presencial',sit:'Activo',promSem:'4.1',promGen:'4.0',cred:'36' }
+];
+let currentUser = null;
+let selectedIdx = null;
+let editMode = 'add';
+
+function gv(id){ return document.getElementById(id).value.trim(); }
+function sv(id,v){ document.getElementById(id).value = v; }
+function el(id){ return document.getElementById(id); }
+
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); el(id).classList.add('active'); }
+function openModal(id){ el(id).classList.add('open'); }
+function closeModal(id){ el(id).classList.remove('open'); }
+
+function showToast(id){ const t=el(id); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+function doLogin(){
+  const u=gv('login-user'), p=gv('login-pass');
+  el('login-error').classList.remove('show');
+  if(u==='admin'&&p==='admin123'){ currentUser={role:'admin',...students[0]}; loadDash(students[0]); showScreen('screen-dashboard'); return; }
+  const s=students.find(x=>x.doc===u&&(p===u||p===x.doc));
+  if(s){ currentUser={role:'student',...s}; loadDash(s); showScreen('screen-dashboard'); }
+  else el('login-error').classList.add('show');
+}
+
+function loadDash(s){
+  el('dash-avatar').textContent=(s.nombre[0]||'')+(s.apellido[0]||'');
+  el('dash-name').textContent=s.nombre+' '+s.apellido;
+  el('dash-prog').textContent=s.prog;
+  el('dash-sit').textContent=s.sit;
+}
+
+function showProfile(){
+  const s=currentUser;
+  el('profile-avatar').textContent=(s.nombre[0]||'')+(s.apellido[0]||'');
+  el('profile-name').textContent=s.nombre+' '+s.apellido;
+  el('profile-prog').textContent=s.prog;
+  el('stat-ps').textContent=s.promSem||'—';
+  el('stat-pg').textContent=s.promGen||'—';
+  el('stat-cr').textContent=s.cred||'—';
+  el('p-tipo').textContent=s.tipo;
+  el('p-doc').textContent=s.doc;
+  el('p-nombre').textContent=s.nombre;
+  el('p-apellido').textContent=s.apellido;
+  el('p-email').textContent=s.email;
+  el('p-tel').textContent=s.tel;
+  el('p-prog').textContent=s.prog;
+  el('p-sem').textContent='Semestre '+s.sem;
+  el('p-jornada').textContent=s.jornada;
+  el('p-met').textContent=s.met;
+  el('p-sit').innerHTML='<span class="badge badge-success">'+s.sit+'</span>';
+  el('p-ps').textContent=s.promSem;
+  el('p-pg').textContent=s.promGen;
+  el('p-cred').textContent=s.cred+' créditos';
+  showScreen('screen-profile');
+}
+
+function openEditProfile(){
+  const s=currentUser;
+  sv('ep-tipo',s.tipo); sv('ep-doc',s.doc); sv('ep-nombre',s.nombre);
+  sv('ep-apellido',s.apellido); sv('ep-email',s.email); sv('ep-tel',s.tel);
+  el('ep-error').classList.remove('show');
+  openModal('modal-edit-personal');
+}
+
+function savePersonal(){
+  const n=gv('ep-nombre'),a=gv('ep-apellido'),e=gv('ep-email'),d=gv('ep-doc');
+  if(!n||!a||!e||!d){ el('ep-error').classList.add('show'); return; }
+  currentUser.tipo=gv('ep-tipo'); currentUser.doc=d; currentUser.nombre=n;
+  currentUser.apellido=a; currentUser.email=e; currentUser.tel=gv('ep-tel');
+  syncStudentFromUser();
+  closeModal('modal-edit-personal');
+  showProfile();
+  showToast('profile-toast');
+}
+
+function openEditAcad(){
+  const s=currentUser;
+  sv('ea-prog',s.prog); sv('ea-sem',s.sem); sv('ea-jornada',s.jornada);
+  sv('ea-met',s.met); sv('ea-sit',s.sit);
+  openModal('modal-edit-acad');
+}
+
+function saveAcad(){
+  currentUser.prog=gv('ea-prog'); currentUser.sem=gv('ea-sem');
+  currentUser.jornada=gv('ea-jornada'); currentUser.met=gv('ea-met'); currentUser.sit=gv('ea-sit');
+  syncStudentFromUser();
+  closeModal('modal-edit-acad');
+  showProfile();
+  showToast('profile-toast');
+}
+
+function openEditPromedios(){
+  sv('epr-sem',currentUser.promSem); sv('epr-gen',currentUser.promGen); sv('epr-cred',currentUser.cred);
+  openModal('modal-edit-promedios');
+}
+
+function savePromedios(){
+  currentUser.promSem=gv('epr-sem'); currentUser.promGen=gv('epr-gen'); currentUser.cred=gv('epr-cred');
+  syncStudentFromUser();
+  closeModal('modal-edit-promedios');
+  showProfile();
+  showToast('profile-toast');
+}
+
+function syncStudentFromUser(){
+  const idx=students.findIndex(s=>s.doc===currentUser.doc);
+  if(idx>=0) students[idx]={...currentUser};
+  loadDash(currentUser);
+}
+
+function goAdmin(){ renderStudentList(); showScreen('screen-admin'); }
+
+function renderStudentList(){
+  el('admin-count').textContent=students.length;
+  el('student-list').innerHTML=students.map((s,i)=>`
+    <div class="student-card" onclick="showStudentDetail(${i})">
+      <div class="student-av">${s.nombre[0]}${s.apellido[0]}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="student-name">${s.nombre} ${s.apellido}</div>
+        <div class="student-info">${s.prog} · Sem ${s.sem} · ${s.doc}</div>
+      </div>
+      <span style="color:var(--border);font-size:16px;">›</span>
+    </div>`).join('');
+}
+
+function showStudentDetail(idx){
+  selectedIdx=idx;
+  const s=students[idx];
+  el('student-detail-body').innerHTML=`
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--blue);margin:0 auto 7px;">${s.nombre[0]}${s.apellido[0]}</div>
+      <div style="font-weight:700;font-size:14px;">${s.nombre} ${s.apellido}</div>
+      <div style="font-size:11px;color:var(--text-muted);">${s.prog}</div>
+    </div>
+    <div class="info-card">
+      <div class="info-card-title">Datos</div>
+      <div class="info-row"><span class="info-label">Documento</span><span class="info-value">${s.tipo} ${s.doc}</span></div>
+      <div class="info-row"><span class="info-label">Email</span><span class="info-value">${s.email}</span></div>
+      <div class="info-row"><span class="info-label">Teléfono</span><span class="info-value">${s.tel}</span></div>
+      <div class="info-row"><span class="info-label">Semestre</span><span class="info-value">${s.sem}</span></div>
+      <div class="info-row"><span class="info-label">Jornada</span><span class="info-value">${s.jornada}</span></div>
+      <div class="info-row"><span class="info-label">Metodología</span><span class="info-value">${s.met}</span></div>
+      <div class="info-row"><span class="info-label">Prom. Sem</span><span class="info-value">${s.promSem}</span></div>
+      <div class="info-row"><span class="info-label">Prom. Gral</span><span class="info-value">${s.promGen}</span></div>
+      <div class="info-row"><span class="info-label">Situación</span><span class="info-value"><span class="badge badge-success">${s.sit}</span></span></div>
+    </div>`;
+  openModal('modal-student-detail');
+}
+
+function openAddStudent(){
+  editMode='add'; selectedIdx=null;
+  el('sf-title').textContent='Agregar Estudiante';
+  ['sf-doc','sf-nombre','sf-apellido','sf-email','sf-tel','sf-ps','sf-pg','sf-cred'].forEach(id=>sv(id,''));
+  el('sf-error').classList.remove('show');
+  openModal('modal-student-form');
+}
+
+function editSelectedStudent(){
+  if(selectedIdx===null) return;
+  editMode='edit';
+  const s=students[selectedIdx];
+  el('sf-title').textContent='Editar Estudiante';
+  sv('sf-tipo',s.tipo); sv('sf-doc',s.doc); sv('sf-nombre',s.nombre);
+  sv('sf-apellido',s.apellido); sv('sf-email',s.email); sv('sf-tel',s.tel);
+  sv('sf-prog',s.prog); sv('sf-sem',s.sem); sv('sf-jornada',s.jornada);
+  sv('sf-met',s.met); sv('sf-sit',s.sit);
+  sv('sf-ps',s.promSem); sv('sf-pg',s.promGen); sv('sf-cred',s.cred);
+  el('sf-error').classList.remove('show');
+  closeModal('modal-student-detail');
+  openModal('modal-student-form');
+}
+
+function saveStudentForm(){
+  const doc=gv('sf-doc'),nom=gv('sf-nombre'),ape=gv('sf-apellido'),ema=gv('sf-email');
+  if(!doc||!nom||!ape||!ema){ el('sf-error').classList.add('show'); return; }
+  const data={ tipo:gv('sf-tipo'),doc,nombre:nom,apellido:ape,email:ema,tel:gv('sf-tel'),
+    prog:gv('sf-prog'),sem:gv('sf-sem'),jornada:gv('sf-jornada'),met:gv('sf-met'),sit:gv('sf-sit'),
+    promSem:gv('sf-ps'),promGen:gv('sf-pg'),cred:gv('sf-cred') };
+  if(editMode==='edit'&&selectedIdx!==null) students[selectedIdx]=data;
+  else students.push(data);
+  closeModal('modal-student-form');
+  renderStudentList();
+  showToast('admin-toast');
+}
+
+function deleteStudent(){
+  if(selectedIdx!==null){ students.splice(selectedIdx,1); closeModal('modal-student-detail'); renderStudentList(); }
+}
+
+function loginAsStudent(){
+  if(selectedIdx!==null){
+    const s=students[selectedIdx];
+    currentUser={role:'student',...s};
+    loadDash(s);
+    closeModal('modal-student-detail');
+    showScreen('screen-dashboard');
+  }
+}
+
+function doLogout(){ showScreen('screen-login'); sv('login-user',''); sv('login-pass',''); }
+
+function switchTab(group, tab, el_){
+  document.querySelectorAll('#modal-'+group+' .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#modal-'+group+' .tab-content').forEach(t=>t.classList.remove('active'));
+  el_.classList.add('active');
+  document.getElementById(group+'-'+tab).classList.add('active');
+}
+</script>
